@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Nwo.StartUp</PackageId>
+    <Version>1.0.0</Version>
+    <Description>Shared startup coordination helper for new-world-order services.</Description>
+  </PropertyGroup>
+
+</Project>
