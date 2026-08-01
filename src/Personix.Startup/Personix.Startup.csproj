@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Personix.Startup</PackageId>
+    <AssemblyName>Personix.Startup</AssemblyName>
+    <RootNamespace>Personix.Startup</RootNamespace>
+    <Version>1.0.2</Version>
+    <Authors>Pavel Kudrna</Authors>
+    <Company>Personix</Company>
+    <Product>Personix.Startup</Product>
+    <Description>Start-up coordination for .NET services. Lets background initialisation signal when the application is ready and lets request handling await that signal, so requests arriving during warm-up wait instead of reaching a half-initialised service.</Description>
+    <Copyright>Copyright (c) 2026 Personix</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/personix-org/Startup</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/personix-org/Startup</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>startup;readiness;warm-up;health-checks;background-service;hosting</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.301" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

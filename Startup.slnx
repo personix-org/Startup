@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="docs\README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Personix.Startup/Personix.Startup.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Personix.Startup.Tests/Personix.Startup.Tests.csproj" Type="Classic C#" />
+  </Folder>
+</Solution>

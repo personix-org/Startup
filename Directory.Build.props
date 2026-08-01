@@ -5,4 +5,8 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Personix.CodeStyle" Version="1.0.0" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

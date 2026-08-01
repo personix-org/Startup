@@ -4,3 +4,6 @@ obj/
 .vs/
 .idea/
 *.nupkg
+artifacts/
+.DS_Store
+.claude/
