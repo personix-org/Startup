@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <!--
+      TargetFrameworks comes from Directory.Build.props, deliberately not overridden here. A single
+      TargetFramework in this file would silently win over it and test only one of the two
+      frameworks the package ships, which is how a green build once tested nothing at all.
+    -->
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
