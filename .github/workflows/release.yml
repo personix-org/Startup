@@ -12,9 +12,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Both SDKs, because the package multi-targets. The net11.0 leg needs SDK 11 to compile at
+      # all, and once it is in TargetFrameworks even the net10.0 leg refuses to build on SDK 10 —
+      # the SDK has to understand every framework in the list before it builds any of them.
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '11.0.x'
+          dotnet-quality: preview
       - run: dotnet restore
       - run: dotnet build -c Release --no-restore
       - run: dotnet test -c Release --no-build --verbosity normal
@@ -28,9 +35,16 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      # Both SDKs, because the package multi-targets. The net11.0 leg needs SDK 11 to compile at
+      # all, and once it is in TargetFrameworks even the net10.0 leg refuses to build on SDK 10 —
+      # the SDK has to understand every framework in the list before it builds any of them.
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '11.0.x'
+          dotnet-quality: preview
       - name: NuGet login (Trusted Publishing)
         uses: NuGet/login@v1
         id: login
