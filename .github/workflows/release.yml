@@ -30,17 +30,22 @@ jobs:
       #
       # The grep is the guard against that recurring. `dotnet test` reports "no test is available"
       # and still exits zero, and VSTestTreatNoTestsAsError does not change that, so the exit code
-      # cannot be trusted to mean anything ran. A run that printed no "Passed!" fails the step.
+      # cannot be trusted to mean anything ran.
+      #
+      # It matches the passed count rather than a fixed banner: the summary reads "Passed!" on the
+      # default verbosity and "Test Run Successful." on normal, so keying on either one breaks the
+      # moment the verbosity changes. Requiring a non-zero count holds under both, and a run of
+      # zero tests fails as it should.
       - name: Test net10.0
         run: |
           set -o pipefail
           dotnet test -c Release --no-build -f net10.0 --verbosity normal | tee test-net10.log
-          grep -q "Passed!" test-net10.log || { echo "::error::No tests ran for net10.0"; exit 1; }
+          grep -qE "Passed:[[:space:]]*[1-9]" test-net10.log || { echo "::error::No tests ran for net10.0"; exit 1; }
       - name: Test net11.0
         run: |
           set -o pipefail
           dotnet test -c Release --no-build -f net11.0 --verbosity normal | tee test-net11.log
-          grep -q "Passed!" test-net11.log || { echo "::error::No tests ran for net11.0"; exit 1; }
+          grep -qE "Passed:[[:space:]]*[1-9]" test-net11.log || { echo "::error::No tests ran for net11.0"; exit 1; }
 
   publish:
     needs: build
