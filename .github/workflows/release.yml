@@ -24,7 +24,23 @@ jobs:
           dotnet-quality: preview
       - run: dotnet restore
       - run: dotnet build -c Release --no-restore
-      - run: dotnet test -c Release --no-build --verbosity normal
+      # One run per framework, and never a bare `dotnet test`. On a multi-targeted test project the
+      # bare form picked a single framework, discovered nothing in it, and still exited zero — a
+      # green build that had tested nothing at all.
+      #
+      # The grep is the guard against that recurring. `dotnet test` reports "no test is available"
+      # and still exits zero, and VSTestTreatNoTestsAsError does not change that, so the exit code
+      # cannot be trusted to mean anything ran. A run that printed no "Passed!" fails the step.
+      - name: Test net10.0
+        run: |
+          set -o pipefail
+          dotnet test -c Release --no-build -f net10.0 --verbosity normal | tee test-net10.log
+          grep -q "Passed!" test-net10.log || { echo "::error::No tests ran for net10.0"; exit 1; }
+      - name: Test net11.0
+        run: |
+          set -o pipefail
+          dotnet test -c Release --no-build -f net11.0 --verbosity normal | tee test-net11.log
+          grep -q "Passed!" test-net11.log || { echo "::error::No tests ran for net11.0"; exit 1; }
 
   publish:
     needs: build
