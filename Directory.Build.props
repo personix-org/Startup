@@ -7,6 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Personix.CodeStyle" Version="1.0.0" PrivateAssets="all" />
+    <PackageReference Include="Personix.CodeStyle" Version="1.0.1" PrivateAssets="all" />
   </ItemGroup>
 </Project>

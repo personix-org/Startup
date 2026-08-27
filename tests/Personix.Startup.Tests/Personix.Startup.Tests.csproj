@@ -20,6 +20,12 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Shouldly" Version="4.3.0" />
+    <!--
+      The package itself only references the abstractions. Exercising AddStartupService needs a real
+      container, and it is pinned to the same 10.0.0 the package declares as its floor, so the tests
+      prove the registration works on the lowest version a consumer may bring.
+    -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,40 +1,71 @@
 namespace Personix.Startup;
 
 /// <summary>
-/// Process-wide readiness latch. Background start-up work calls <see cref="MarkAsReady"/> once, and
-/// request handling calls <see cref="WaitForReadyAsync"/> so a request that arrives during warm-up
-/// waits for the cache, the migration, or the connection pool instead of reaching a half-initialised
-/// service.
+/// The default <see cref="IStartupService"/>: a one-way readiness latch backed by a
+/// <see cref="TaskCompletionSource"/> that belongs to this instance alone.
 /// </summary>
 /// <remarks>
-/// The latch is one-way and cannot be revoked once signalled — it models "the application has
-/// finished starting", not a fluctuating health state. Because the state lives in a single static
-/// field, it is shared by the whole process: tests that call <see cref="MarkAsReady"/> affect every
-/// later test in the same process unless the field is reset between them.
+/// Register it with <c>AddStartupService()</c> and inject <see cref="IStartupService"/>; construct it
+/// directly only in tests that want a latch isolated from everything else in the process.
+/// <para>
+/// The interface members are implemented explicitly, so <see cref="MarkAsReady()"/> and
+/// <see cref="WaitForReadyAsync(CancellationToken)"/> reached through the type name are the
+/// deprecated static ones, while the instance behind <see cref="IStartupService"/> is the supported
+/// surface. Both act on a latch, but not on the same one: the static members share a single
+/// process-wide instance, whereas every <c>new StartupService()</c> owns its own.
+/// </para>
 /// </remarks>
-public static class StartupService
+public sealed class StartupService : IStartupService
 {
-    private static readonly TaskCompletionSource Tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    /// <summary>
+    /// The one instance the deprecated static members act on, and the one <c>AddStartupService()</c>
+    /// registers while those members still exist.
+    /// </summary>
+    /// <remarks>
+    /// Sharing it is what lets an application migrate one call site at a time: a warm-up worker still
+    /// calling the static <see cref="MarkAsReady()"/> releases middleware that already awaits the
+    /// injected <see cref="IStartupService"/>. Registering a fresh instance instead would give those
+    /// two halves separate latches and hang every request.
+    /// </remarks>
+    internal static readonly StartupService Shared = new();
 
-    /// <summary>Waits until <see cref="MarkAsReady"/> has been called, then returns immediately on every later call.</summary>
+    private readonly TaskCompletionSource tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    /// <inheritdoc />
+    Task IStartupService.WaitForReadyAsync(CancellationToken cancellationToken)
+    {
+        return tcs.Task.WaitAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    void IStartupService.MarkAsReady()
+    {
+        tcs.TrySetResult();
+    }
+
+    /// <summary>Waits on the process-wide latch until <see cref="MarkAsReady()"/> has been called.</summary>
     /// <param name="cancellationToken">Stops the wait early; ignored once readiness has already been signalled.</param>
     /// <returns>A task that completes once the application has signalled readiness.</returns>
     /// <exception cref="OperationCanceledException">
-    /// <paramref name="cancellationToken"/> was cancelled before <see cref="MarkAsReady"/> was called.
+    /// <paramref name="cancellationToken"/> was cancelled before <see cref="MarkAsReady()"/> was called.
     /// </exception>
+    [Obsolete(
+        "The static latch is process-wide, so it cannot be substituted in tests and leaks readiness " +
+        "between them. Call AddStartupService() and inject IStartupService instead. This member will " +
+        "be removed in 3.0.")]
     public static Task WaitForReadyAsync(CancellationToken cancellationToken)
     {
-        return Tcs.Task.WaitAsync(cancellationToken);
+        return ((IStartupService)Shared).WaitForReadyAsync(cancellationToken);
     }
 
-    /// <summary>Signals that start-up has finished, releasing every caller currently in <see cref="WaitForReadyAsync"/> and every future one.</summary>
-    /// <remarks>
-    /// Idempotent and safe to call from multiple threads — only the first call has any effect, later
-    /// ones are no-ops. Call this only once everything critical has finished; if initialisation fails,
-    /// do not call it, so the service never admits traffic while broken.
-    /// </remarks>
+    /// <summary>Signals readiness on the process-wide latch, releasing every caller waiting on it.</summary>
+    /// <remarks>Idempotent and safe to call from multiple threads — only the first call has any effect.</remarks>
+    [Obsolete(
+        "The static latch is process-wide, so it cannot be substituted in tests and leaks readiness " +
+        "between them. Call AddStartupService() and inject IStartupService instead. This member will " +
+        "be removed in 3.0.")]
     public static void MarkAsReady()
     {
-        Tcs.TrySetResult();
+        ((IStartupService)Shared).MarkAsReady();
     }
 }
