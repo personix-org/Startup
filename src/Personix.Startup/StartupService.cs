@@ -29,18 +29,18 @@ public sealed class StartupService : IStartupService
     /// </remarks>
     internal static readonly StartupService Shared = new();
 
-    private readonly TaskCompletionSource tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource _tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     /// <inheritdoc />
     Task IStartupService.WaitForReadyAsync(CancellationToken cancellationToken)
     {
-        return tcs.Task.WaitAsync(cancellationToken);
+        return _tcs.Task.WaitAsync(cancellationToken);
     }
 
     /// <inheritdoc />
     void IStartupService.MarkAsReady()
     {
-        tcs.TrySetResult();
+        _tcs.TrySetResult();
     }
 
     /// <summary>Waits on the process-wide latch until <see cref="MarkAsReady()"/> has been called.</summary>
